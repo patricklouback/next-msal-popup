@@ -92,6 +92,11 @@ The interesting part of the test suite runs against real `@azure/msal-browser`: 
 listener read the message off a real `BroadcastChannel` the same way `waitForBridgeResponse` does.
 If Microsoft changes the shape, those tests break instead of your login.
 
+## A working example
+
+`example/` has the five files of a Next.js App Router app that signs in with Microsoft, plus what
+to put in the Entra portal. The redirect page there is the same eight lines shown above.
+
 ## Status
 
 Version 0.1, ESM only, Node 20 or newer. Tested against `@azure/msal-browser` 5.21.

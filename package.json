@@ -1,0 +1,72 @@
+{
+  "name": "next-msal-popup",
+  "version": "0.1.0",
+  "description": "Finish an MSAL Browser v5 popup login from a Next.js redirect page. Forwards the auth response over the BroadcastChannel MSAL is listening on, then closes the popup.",
+  "license": "MIT",
+  "author": "Patrick Louback",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patricklouback/next-msal-popup.git"
+  },
+  "homepage": "https://github.com/patricklouback/next-msal-popup#readme",
+  "keywords": [
+    "msal",
+    "msal-browser",
+    "azure-ad",
+    "entra-id",
+    "nextjs",
+    "app-router",
+    "popup",
+    "oauth",
+    "authentication",
+    "react"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "peerDependencies": {
+    "@azure/msal-browser": ">=5 <6",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@azure/msal-browser": "5.21.0",
+    "@biomejs/biome": "2.5.12",
+    "@testing-library/react": "16.1.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "19.0.2",
+    "jsdom": "25.0.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

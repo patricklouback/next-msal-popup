@@ -1,6 +1,6 @@
 {
   "name": "next-msal-popup",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Finish an MSAL Browser v5 popup login from a Next.js redirect page. Forwards the auth response over the BroadcastChannel MSAL is listening on, then closes the popup.",
   "license": "MIT",
   "author": "Patrick Louback",

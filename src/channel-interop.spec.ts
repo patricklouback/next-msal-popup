@@ -34,7 +34,7 @@ describe("the message the parent actually reads", () => {
     const message = await received;
     parent.close();
 
-    expect(result).toEqual({ status: "forwarded", channelId });
+    expect(result).toEqual({ status: "forwarded", channelId, windowStillOpen: false });
     expect(message.payload).toBe(PAYLOAD);
     expect(message.v).toBe(1);
     expect(close).toHaveBeenCalledOnce();
@@ -49,7 +49,7 @@ describe("the message the parent actually reads", () => {
       browserDeps(() => ({ payload: PAYLOAD, libraryState: { id: channelId } })),
     );
 
-    expect(result).toEqual({ status: "forwarded", channelId });
+    expect(result).toEqual({ status: "forwarded", channelId, windowStillOpen: false });
     expect(close).toHaveBeenCalledOnce();
   });
 

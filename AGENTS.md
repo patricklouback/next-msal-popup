@@ -68,4 +68,14 @@ all and asserting the payload still goes out.
 **The hook guards with a ref, not with a dependency array.** React StrictMode runs effects twice
 in development, and posting the same auth response twice is a real bug rather than a cosmetic one.
 
+**`window.close()` can be refused, so never build a UI that assumes it worked.** Confirmed against
+a real Entra tenant: the handshake succeeded, MSAL reported `loginSuccess` in the parent, and the
+popup stayed on screen anyway. A page that only renders "closing..." leaves the person staring at a
+spinner after a sign-in that already worked. `usePopupRedirect` asks to close, retries once at half
+the grace period, and then sets `windowStillOpen` so the page can say so out loud.
+
+Why the browser refused it is still open. Microsoft's authorize endpoint sends
+`Cross-Origin-Opener-Policy-Report-Only`, which reports without severing, so COOP is not the
+explanation. Do not write a cause into the docs until there is a measurement behind it.
+
 **No comments in the source.** Reasoning goes here.

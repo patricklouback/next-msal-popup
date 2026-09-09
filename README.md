@@ -60,12 +60,23 @@ const result = completeMsalPopupRedirect({ homeUrl: "/signin" });
 
 | status | what happened |
 | --- | --- |
-| `forwarded` | the payload went out on the channel and the window was closed |
+| `forwarded` | the payload went out on the channel, and `windowStillOpen` says whether the close took |
 | `no-auth-response` | the URL had no auth response, so the visitor went to `homeUrl` |
 
 Options are `homeUrl` (default `/`), `closeWindow` (default `true`), `navigateOnMiss` (default
-`true`, set it to `false` while debugging so the URL stays on screen) and `messageVersion`
-(default `1`, which is what MSAL reads today).
+`true`, set it to `false` while debugging so the URL stays on screen), `closeGraceMs` (default
+`600`) and `messageVersion` (default `1`, which is what MSAL reads today).
+
+## The browser may refuse to close the popup
+
+`window.close()` is a request, not a command, and a browser is free to ignore it. When that
+happens the popup sits there spinning while the sign-in has in fact already succeeded, which looks
+far worse than it is.
+
+So the hook checks. It asks to close, retries once, and if the page is still running after
+`closeGraceMs` it flips `windowStillOpen` to `true`. Render that state and tell the person they can
+close the window, the way `example/` does. The sign-in is already done at that point: the payload
+went out the moment the page loaded.
 
 ## Do not gate this on window.opener
 

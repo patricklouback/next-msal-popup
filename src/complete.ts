@@ -53,7 +53,12 @@ export function completePopupRedirect(
 
   if (shouldClose) deps.closeWindow();
 
-  return { status: "forwarded", channelId };
+  return { status: "forwarded", channelId, windowStillOpen: false };
+}
+
+export function closeSelf(): void {
+  if (typeof window === "undefined") return;
+  window.close();
 }
 
 export function browserDeps(

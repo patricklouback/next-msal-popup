@@ -20,10 +20,11 @@ export interface CompletePopupRedirectOptions {
   closeWindow?: boolean;
   messageVersion?: number;
   navigateOnMiss?: boolean;
+  closeGraceMs?: number;
 }
 
 export type PopupRedirectResult =
-  | { status: "forwarded"; channelId: string }
+  | { status: "forwarded"; channelId: string; windowStillOpen: boolean }
   | { status: "no-auth-response"; reason: string; navigatedTo: string | null };
 
 export class NotInBrowserError extends Error {

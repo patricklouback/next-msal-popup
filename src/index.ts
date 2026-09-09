@@ -2,7 +2,7 @@ import { BrowserUtils } from "@azure/msal-browser";
 import { browserDeps, completePopupRedirect } from "./complete";
 import type { CompletePopupRedirectOptions, PopupRedirectResult } from "./types";
 
-export { browserDeps, completePopupRedirect } from "./complete";
+export { browserDeps, closeSelf, completePopupRedirect } from "./complete";
 export type {
   CompletePopupRedirectOptions,
   ParsedAuthResponse,

@@ -18,6 +18,21 @@ export default function AuthRedirectPage() {
     );
   }
 
+  if (result?.status === "forwarded" && result.windowStillOpen) {
+    return (
+      <main className={styles.shell}>
+        <div className={styles.panel}>
+          <div className={styles.label}>next-msal-popup</div>
+          <p className={styles.line}>Signed in. You can close this window.</p>
+          <div className={styles.reason}>
+            The response reached the other window. This one asked to close itself and the browser
+            refused, which it is allowed to do.
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.shell}>
       <div className={styles.panel}>

@@ -27,7 +27,7 @@ describe("completePopupRedirect", () => {
 
     expect(context.deps.openChannel).toHaveBeenCalledWith("chan-1");
     expect(context.posted).toEqual([{ payload: "code=abc&state=xyz", v: 1 }]);
-    expect(result).toEqual({ status: "forwarded", channelId: "chan-1" });
+    expect(result).toEqual({ status: "forwarded", channelId: "chan-1", windowStillOpen: false });
   });
 
   it("forwards without asking whether window.opener survived", () => {

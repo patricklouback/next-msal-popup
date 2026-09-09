@@ -1,7 +1,12 @@
-import type { ReactNode } from "react";
+import "./global.css";
 import { Providers } from "./providers";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export const metadata = {
+  title: "next-msal-popup",
+  description: "Popup sign-in with MSAL Browser v5 in the Next.js App Router",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>

@@ -14,11 +14,15 @@ NEXT_PUBLIC_AZURE_TENANT_ID=your-tenant-id-or-common
 ```
 
 In the Entra portal, open your app registration, go to Authentication, and add
-`http://localhost:3000/auth/redirect` as a **Single-page application** redirect URI. It has to be
+`http://localhost:PORT/auth/redirect` as a **Single-page application** redirect URI. It has to be
 the SPA platform, not Web, or you get a CORS error instead of a token.
 
-Run `next dev`, click the button, sign in. The popup closes on its own and the parent page shows
-the account.
+Check the port before you type it. `next dev` uses 3000, but Nx's `@nx/next:server` serves on
+**4200**, and the redirect URI has to match exactly, port included. The server prints the URL it
+picked.
+
+Run the dev server, click the button, sign in. The popup closes on its own and the parent page
+shows the account.
 
 ## Why the provider is in the root layout
 
@@ -33,8 +37,13 @@ there. The root layout covers both.
 | `lib/msal.ts` | the `PublicClientApplication`, with `redirectUri` pointing at the page below |
 | `app/providers.tsx` | calls `initialize()` before rendering, which v5 requires |
 | `app/layout.tsx` | puts the provider at the root so the redirect page is covered |
-| `app/page.tsx` | the `loginPopup()` button and the signed-in state |
+| `app/page.tsx` | the sign-in button, plus a live log of MSAL's own events |
 | `app/auth/redirect/page.tsx` | the whole point: one hook call |
+| `app/global.css`, `*.module.css` | light and dark from `prefers-color-scheme`, no toggle |
+
+The home page prints the redirect URI it resolved, so you can copy that exact string into Entra
+instead of guessing the port. It also subscribes to `instance.addEventCallback` and lists what MSAL
+reports, which is the fastest way to see where a broken flow stopped.
 
 ## No Entra tenant handy
 

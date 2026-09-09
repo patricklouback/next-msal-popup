@@ -5,7 +5,12 @@ import {
   type PopupRedirectResult,
 } from "./types";
 
-const DEFAULTS = { homeUrl: "/", closeWindow: true, messageVersion: 1 } as const;
+const DEFAULTS = {
+  homeUrl: "/",
+  closeWindow: true,
+  messageVersion: 1,
+  navigateOnMiss: true,
+} as const;
 
 function reasonFrom(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -19,25 +24,24 @@ export function completePopupRedirect(
   const homeUrl = options.homeUrl ?? DEFAULTS.homeUrl;
   const shouldClose = options.closeWindow ?? DEFAULTS.closeWindow;
   const messageVersion = options.messageVersion ?? DEFAULTS.messageVersion;
+  const navigateOnMiss = options.navigateOnMiss ?? DEFAULTS.navigateOnMiss;
 
-  if (!deps.isPopupWindow()) {
+  const miss = (reason: string): PopupRedirectResult => {
+    if (!navigateOnMiss) return { status: "no-auth-response", reason, navigatedTo: null };
     deps.navigate(homeUrl);
-    return { status: "not-a-popup", navigatedTo: homeUrl };
-  }
+    return { status: "no-auth-response", reason, navigatedTo: homeUrl };
+  };
 
   let parsed: ReturnType<PopupRedirectDeps["parseAuthResponse"]>;
   try {
     parsed = deps.parseAuthResponse();
   } catch (error) {
-    return { status: "no-auth-response", reason: reasonFrom(error) };
+    return miss(reasonFrom(error));
   }
 
   const channelId = parsed.libraryState?.id;
   if (typeof channelId !== "string" || channelId === "") {
-    return {
-      status: "no-auth-response",
-      reason: "the state parameter carries no library state id",
-    };
+    return miss("the state parameter carries no library state id");
   }
 
   const channel = deps.openChannel(channelId);
@@ -58,7 +62,6 @@ export function browserDeps(
   if (typeof window === "undefined") throw new NotInBrowserError();
 
   return {
-    isPopupWindow: () => Boolean(window.opener) && window.opener !== window,
     parseAuthResponse,
     openChannel: (channelId) => new BroadcastChannel(channelId),
     navigate: (url) => {

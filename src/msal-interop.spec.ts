@@ -35,9 +35,11 @@ describe("interop with the real msal-browser", () => {
 
   it("reports a readable reason when the url has no auth response at all", () => {
     landOnRedirectPage("");
-    Object.defineProperty(window, "opener", { value: { name: "parent" }, configurable: true });
 
-    const result = completePopupRedirect({}, browserDeps(BrowserUtils.parseAuthResponseFromUrl));
+    const result = completePopupRedirect(
+      { navigateOnMiss: false },
+      browserDeps(BrowserUtils.parseAuthResponseFromUrl),
+    );
 
     expect(result.status).toBe("no-auth-response");
   });

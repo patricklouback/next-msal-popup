@@ -45,6 +45,10 @@ describe("usePopupRedirect", () => {
 
     const { result } = renderHook(() => usePopupRedirect());
 
-    expect(result.current).toEqual({ status: "no-auth-response", reason: "needs a browser" });
+    expect(result.current).toEqual({
+      status: "no-auth-response",
+      reason: "needs a browser",
+      navigatedTo: null,
+    });
   });
 });

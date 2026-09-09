@@ -5,12 +5,9 @@ const PAYLOAD = "code=the-code&state=abc%7Cuser";
 
 function stubPopupWindow(search: string) {
   const close = vi.fn();
-  vi.stubGlobal("window", {
-    location: { hash: "", search, replace: vi.fn() },
-    opener: { name: "parent" },
-    close,
-  });
-  return { close };
+  const replace = vi.fn();
+  vi.stubGlobal("window", { location: { hash: "", search, replace }, close });
+  return { close, replace };
 }
 
 afterEach(() => {
@@ -43,37 +40,31 @@ describe("the message the parent actually reads", () => {
     expect(close).toHaveBeenCalledOnce();
   });
 
-  it("sends the visitor home instead of posting when there is no opener", () => {
-    const replace = vi.fn();
-    vi.stubGlobal("window", {
-      location: { hash: "", search: "", replace },
-      opener: null,
-      close: vi.fn(),
-    });
-
-    const result = completePopupRedirect(
-      { homeUrl: "/signin" },
-      browserDeps(() => ({ payload: PAYLOAD, libraryState: { id: "never-used" } })),
-    );
-
-    expect(result).toEqual({ status: "not-a-popup", navigatedTo: "/signin" });
-    expect(replace).toHaveBeenCalledWith("/signin");
-  });
-
-  it("treats a window that opened itself as a direct visit, not a popup", () => {
-    const self: Record<string, unknown> = {
-      location: { hash: "", search: "", replace: vi.fn() },
-      close: vi.fn(),
-    };
-    self.opener = self;
-    vi.stubGlobal("window", self);
+  it("still forwards when window.opener is gone, which is what broke before", () => {
+    const channelId = "chan-no-opener";
+    const { close } = stubPopupWindow(`?${PAYLOAD}`);
 
     const result = completePopupRedirect(
       {},
-      browserDeps(() => ({ payload: PAYLOAD, libraryState: { id: "never-used" } })),
+      browserDeps(() => ({ payload: PAYLOAD, libraryState: { id: channelId } })),
     );
 
-    expect(result.status).toBe("not-a-popup");
+    expect(result).toEqual({ status: "forwarded", channelId });
+    expect(close).toHaveBeenCalledOnce();
+  });
+
+  it("sends the visitor home when there is no auth response to forward", () => {
+    const { replace } = stubPopupWindow("");
+
+    const result = completePopupRedirect(
+      { homeUrl: "/signin" },
+      browserDeps(() => {
+        throw new Error("no auth payload found in the url");
+      }),
+    );
+
+    expect(result.status).toBe("no-auth-response");
+    expect(replace).toHaveBeenCalledWith("/signin");
   });
 
   it("throws a named error when there is no window at all, which is the SSR case", async () => {

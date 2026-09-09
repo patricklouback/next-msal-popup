@@ -61,21 +61,28 @@ const result = completeMsalPopupRedirect({ homeUrl: "/signin" });
 | status | what happened |
 | --- | --- |
 | `forwarded` | the payload went out on the channel and the window was closed |
-| `not-a-popup` | no opener, so the visitor was sent to `homeUrl` |
-| `no-auth-response` | the URL had no auth response, and `reason` says why |
+| `no-auth-response` | the URL had no auth response, so the visitor went to `homeUrl` |
 
-Options are `homeUrl` (default `/`), `closeWindow` (default `true`, turn it off while debugging so
-you can read the URL) and `messageVersion` (default `1`, which is what MSAL reads today).
+Options are `homeUrl` (default `/`), `closeWindow` (default `true`), `navigateOnMiss` (default
+`true`, set it to `false` while debugging so the URL stays on screen) and `messageVersion`
+(default `1`, which is what MSAL reads today).
 
-On failure the popup stays open on purpose. Closing it would throw away the only place the error
-is visible.
+## Do not gate this on window.opener
 
-## Two things that will bite you anyway
+The first version of this package checked `window.opener` to decide whether it was running in a
+popup, and it was wrong. By the time the popup comes back from Microsoft, that reference can
+already be gone, and then the check fails, the page sends itself to your home URL, and you watch a
+popup sitting on your own landing page while the parent waits for a message that never arrives.
 
-`BrowserUtils.isInPopup()` in v5 decides by reading `meta.interactionType` out of the `state`
-parameter, not by looking at `window.opener`. That means a bookmarked redirect URL with a stale
-`state` still answers `true`. This package checks `window.opener` instead, which is the question
-you actually wanted answered.
+So the question this package asks is whether the URL carries a parseable MSAL auth response. If it
+does, forward it. If it does not, this is somebody opening a bookmark, so send them home. The
+opener never enters into it, which is the same conclusion MSAL reached: `BroadcastChannel` exists
+precisely so the popup does not need a handle on the window that opened it.
+
+`BrowserUtils.isInPopup()` is not the answer either. It reads `meta.interactionType` out of the
+`state` parameter, so a bookmarked URL with a stale `state` still answers `true`.
+
+## One more thing that will bite you
 
 If your `MsalProvider` lives inside a route group, the redirect page probably sits outside it and
 renders with no MSAL context. Put the provider in the root layout.
@@ -99,7 +106,11 @@ to put in the Entra portal. The redirect page there is the same eight lines show
 
 ## Status
 
-Version 0.1, ESM only, Node 20 or newer. Tested against `@azure/msal-browser` 5.21.
+Version 0.2, ESM only, Node 20 or newer. Tested against `@azure/msal-browser` 5.21.
+
+0.2.0 dropped the `window.opener` check described above, which means the `not-a-popup` status is
+gone and `no-auth-response` now carries `navigatedTo`. If you were matching on `not-a-popup`,
+match on `no-auth-response`.
 
 ## License
 

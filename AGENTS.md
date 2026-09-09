@@ -47,11 +47,23 @@ parsing assertions run under jsdom in `src/msal-interop.spec.ts`. Do not merge t
 back together.
 
 **The popup deliberately stays open when something fails.** Closing it on the error path throws
-away the URL, which is the only evidence of what went wrong. Only the `forwarded` path closes.
+away the URL, which is the only evidence of what went wrong. Only the `forwarded` path closes, and
+`navigateOnMiss: false` keeps the URL on screen while debugging.
 
-**`window.opener` is the popup check, not `BrowserUtils.isInPopup()`.** In v5 `isInPopup()` reads
-`meta.interactionType` out of the `state` parameter, so a bookmarked URL with an old `state`
-answers `true` and the page would try to post to a channel nobody is listening on.
+**Nothing here may depend on `window.opener`, and 0.1.x did.** That version gated on
+`Boolean(window.opener) && window.opener !== window`. In a real Next.js app the popup came back
+from Microsoft with that reference already gone, the guard decided it was a direct visit, and
+`window.location.replace("/")` put the app's own landing page inside the popup while the parent sat
+waiting on a channel that never got a message. From the outside it reads as a hung login.
+
+The gate is now the auth response itself: parse it, and if the URL has one, forward it. A parse
+failure means somebody opened a bookmark, which is the only case that navigates to `homeUrl`. This
+is the same conclusion MSAL reached, and it is why `BroadcastChannel` exists in v5 instead of
+`postMessage` to the opener. `BrowserUtils.isInPopup()` is not a substitute: it reads
+`meta.interactionType` out of the `state`, so a stale bookmarked URL answers `true`.
+
+`src/channel-interop.spec.ts` has a check named for this, stubbing a `window` with no `opener` at
+all and asserting the payload still goes out.
 
 **The hook guards with a ref, not with a dependency array.** React StrictMode runs effects twice
 in development, and posting the same auth response twice is a real bug rather than a cosmetic one.

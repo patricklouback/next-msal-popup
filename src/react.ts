@@ -20,6 +20,7 @@ export function usePopupRedirect(
       setResult({
         status: "no-auth-response",
         reason: error instanceof Error ? error.message : String(error),
+        navigatedTo: null,
       });
     }
   }, []);

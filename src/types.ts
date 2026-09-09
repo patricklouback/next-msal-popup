@@ -9,7 +9,6 @@ export interface PopupChannel {
 }
 
 export interface PopupRedirectDeps {
-  isPopupWindow: () => boolean;
   parseAuthResponse: () => ParsedAuthResponse;
   openChannel: (channelId: string) => PopupChannel;
   navigate: (url: string) => void;
@@ -20,12 +19,12 @@ export interface CompletePopupRedirectOptions {
   homeUrl?: string;
   closeWindow?: boolean;
   messageVersion?: number;
+  navigateOnMiss?: boolean;
 }
 
 export type PopupRedirectResult =
   | { status: "forwarded"; channelId: string }
-  | { status: "not-a-popup"; navigatedTo: string }
-  | { status: "no-auth-response"; reason: string };
+  | { status: "no-auth-response"; reason: string; navigatedTo: string | null };
 
 export class NotInBrowserError extends Error {
   constructor() {

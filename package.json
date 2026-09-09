@@ -46,7 +46,8 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "biome check .",
-    "lint:fix": "biome check --write ."
+    "lint:fix": "biome check --write .",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
     "@azure/msal-browser": ">=5 <6",
